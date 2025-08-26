@@ -10,11 +10,10 @@ export interface Task {
 export interface CreateTaskRequest {
   task_name: string;
   description: string;
-  status: 'In-Progress' | 'Completed';
 }
 
 export interface UpdateTaskRequest {
-  task_name: string;
-  description: string;
-  status: 'In-Progress' | 'Completed';
+  task_name?: string;
+  description?: string;
+  status?: 'In-Progress' | 'Completed';
 }

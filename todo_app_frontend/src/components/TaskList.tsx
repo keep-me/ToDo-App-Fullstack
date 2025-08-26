@@ -1,24 +1,25 @@
 import React from 'react';
-import { CheckSquare, Clock } from 'lucide-react';
+import { Clock, CheckCircle2 } from 'lucide-react';
 import { Task, UpdateTaskRequest } from '../types/Task';
-import TaskItem from './TaskItem';
+import { TaskItem } from './TaskItem';
 
 interface TaskListProps {
   tasks: Task[];
-  onUpdate: (id: number, task: UpdateTaskRequest) => Promise<boolean>;
-  onDelete: (id: number) => Promise<boolean>;
+  onUpdateTask: (id: number, updates: UpdateTaskRequest) => Promise<void>;
+  onDeleteTask: (id: number) => Promise<void>;
+  loading: boolean;
 }
 
-const TaskList: React.FC<TaskListProps> = ({ tasks, onUpdate, onDelete }) => {
+export const TaskList: React.FC<TaskListProps> = ({ tasks, onUpdateTask, onDeleteTask, loading }) => {
   const inProgressTasks = tasks.filter(task => task.status === 'In-Progress');
   const completedTasks = tasks.filter(task => task.status === 'Completed');
 
   if (tasks.length === 0) {
     return (
       <div className="text-center py-12">
-        <CheckSquare className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-        <h3 className="text-xl font-medium text-gray-900 mb-2">No tasks yet</h3>
-        <p className="text-gray-600">Add your first task to get started!</p>
+        <div className="text-gray-400 text-6xl mb-4">📝</div>
+        <h3 className="text-xl font-semibold text-gray-600 mb-2">No tasks yet</h3>
+        <p className="text-gray-500">Create your first task using the form above!</p>
       </div>
     );
   }
@@ -26,50 +27,60 @@ const TaskList: React.FC<TaskListProps> = ({ tasks, onUpdate, onDelete }) => {
   return (
     <div className="space-y-8">
       {/* In-Progress Tasks */}
-      {inProgressTasks.length > 0 && (
-        <div>
-          <div className="flex items-center mb-4">
-            <Clock className="w-5 h-5 text-blue-600 mr-2" />
-            <h3 className="text-lg font-semibold text-gray-900">
-              In Progress ({inProgressTasks.length})
-            </h3>
+      <div>
+        <div className="flex items-center gap-2 mb-4">
+          <Clock className="w-5 h-5 text-blue-600" />
+          <h2 className="text-xl font-bold text-gray-800">
+            In Progress ({inProgressTasks.length})
+          </h2>
+        </div>
+        
+        {inProgressTasks.length === 0 ? (
+          <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg">
+            <p className="text-blue-700">No tasks in progress. All caught up! 🎉</p>
           </div>
-          <div className="space-y-4">
+        ) : (
+          <div className="space-y-3">
             {inProgressTasks.map(task => (
               <TaskItem
                 key={task.id}
                 task={task}
-                onUpdate={onUpdate}
-                onDelete={onDelete}
+                onUpdate={onUpdateTask}
+                onDelete={onDeleteTask}
+                loading={loading}
               />
             ))}
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Completed Tasks */}
-      {completedTasks.length > 0 && (
-        <div>
-          <div className="flex items-center mb-4">
-            <CheckSquare className="w-5 h-5 text-green-600 mr-2" />
-            <h3 className="text-lg font-semibold text-gray-900">
-              Completed ({completedTasks.length})
-            </h3>
+      <div>
+        <div className="flex items-center gap-2 mb-4">
+          <CheckCircle2 className="w-5 h-5 text-green-600" />
+          <h2 className="text-xl font-bold text-gray-800">
+            Completed ({completedTasks.length})
+          </h2>
+        </div>
+        
+        {completedTasks.length === 0 ? (
+          <div className="bg-green-50 border border-green-200 p-4 rounded-lg">
+            <p className="text-green-700">No completed tasks yet. Keep working! 💪</p>
           </div>
-          <div className="space-y-4">
+        ) : (
+          <div className="space-y-3">
             {completedTasks.map(task => (
               <TaskItem
                 key={task.id}
                 task={task}
-                onUpdate={onUpdate}
-                onDelete={onDelete}
+                onUpdate={onUpdateTask}
+                onDelete={onDeleteTask}
+                loading={loading}
               />
             ))}
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };
-
-export default TaskList;
