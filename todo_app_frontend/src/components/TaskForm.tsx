@@ -10,6 +10,7 @@ const TaskForm: React.FC<TaskFormProps> = ({ onSubmit }) => {
   const [taskName, setTaskName] = useState('');
   const [description, setDescription] = useState('');
   const [status, setStatus] = useState<'In-Progress' | 'Completed'>('In-Progress');
+  const [priority, setPriority] = useState<'High' | 'Medium' | 'Low'>('Medium');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -21,12 +22,14 @@ const TaskForm: React.FC<TaskFormProps> = ({ onSubmit }) => {
       task_name: taskName.trim(),
       description: description.trim(),
       status,
+      priority,
     });
 
     if (success) {
       setTaskName('');
       setDescription('');
       setStatus('In-Progress');
+      setPriority('Medium');
     }
     setIsSubmitting(false);
   };
@@ -39,7 +42,7 @@ const TaskForm: React.FC<TaskFormProps> = ({ onSubmit }) => {
       </h2>
       
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Task Name
@@ -66,6 +69,22 @@ const TaskForm: React.FC<TaskFormProps> = ({ onSubmit }) => {
             >
               <option value="In-Progress">In-Progress</option>
               <option value="Completed">Completed</option>
+            </select>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Priority
+            </label>
+            <select
+              value={priority}
+              onChange={(e) => setPriority(e.target.value as 'High' | 'Medium' | 'Low')}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+              disabled={isSubmitting}
+            >
+              <option value="High">High</option>
+              <option value="Medium">Medium</option>
+              <option value="Low">Low</option>
             </select>
           </div>
         </div>

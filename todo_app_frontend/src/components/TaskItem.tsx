@@ -13,6 +13,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onUpdate, onDelete }) => {
   const [editName, setEditName] = useState(task.task_name);
   const [editDescription, setEditDescription] = useState(task.description);
   const [editStatus, setEditStatus] = useState(task.status);
+  const [editPriority, setEditPriority] = useState(task.priority);
   const [isUpdating, setIsUpdating] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -21,6 +22,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onUpdate, onDelete }) => {
     setEditName(task.task_name);
     setEditDescription(task.description);
     setEditStatus(task.status);
+    setEditPriority(task.priority);
   };
 
   const handleCancel = () => {
@@ -28,6 +30,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onUpdate, onDelete }) => {
     setEditName(task.task_name);
     setEditDescription(task.description);
     setEditStatus(task.status);
+    setEditPriority(task.priority);
   };
 
   const handleSave = async () => {
@@ -38,6 +41,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onUpdate, onDelete }) => {
       task_name: editName.trim(),
       description: editDescription.trim(),
       status: editStatus,
+      priority: editPriority,
     });
 
     if (success) {
@@ -54,6 +58,18 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onUpdate, onDelete }) => {
   };
 
   const statusColor = task.status === 'Completed' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800';
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case 'High':
+        return 'bg-red-100 text-red-800';
+      case 'Medium':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'Low':
+        return 'bg-green-100 text-green-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
   
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -94,14 +110,29 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onUpdate, onDelete }) => {
                 <option value="In-Progress">In-Progress</option>
                 <option value="Completed">Completed</option>
               </select>
+              <select
+                value={editPriority}
+                onChange={(e) => setEditPriority(e.target.value as 'High' | 'Medium' | 'Low')}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                disabled={isUpdating}
+              >
+                <option value="High">High</option>
+                <option value="Medium">Medium</option>
+                <option value="Low">Low</option>
+              </select>
             </div>
           ) : (
             <div>
               <h3 className="text-lg font-medium text-gray-900 truncate">{task.task_name}</h3>
               <p className="text-gray-600 mt-2 text-sm leading-relaxed">{task.description}</p>
-              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium mt-2 ${statusColor}`}>
-                {task.status}
-              </span>
+              <div className="flex flex-wrap gap-2 mt-2">
+                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusColor}`}>
+                  {task.status}
+                </span>
+                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getPriorityColor(task.priority)}`}>
+                  {task.priority}
+                </span>
+              </div>
               <div className="mt-3 text-xs text-gray-500 space-y-1">
                 <div>Created: {formatDate(task.created_at)}</div>
                 <div>Updated: {formatDate(task.updated_at)}</div>

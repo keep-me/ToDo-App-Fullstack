@@ -7,16 +7,19 @@ function App() {
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('All');
+  const [filterPriority, setFilterPriority] = useState('All');
+  const [sortBy, setSortBy] = useState('None');
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
   const [newTask, setNewTask] = useState({
     task_name: '',
-    description: ''
+    description: '',
+    priority: 'Medium'
   });
 
   // API Base URL - Update this to your Django backend URL
-  // const API_BASE_URL = 'http://localhost:8000/api'; // Change this to your backend URL
-  const API_BASE_URL = 'https://todo-app-fullstack-nrfk.onrender.com/api';
+  const API_BASE_URL = 'http://localhost:8000/api'; // Change this to your backend URL
+  // const API_BASE_URL = 'https://todo-app-fullstack-nrfk.onrender.com/api';
 
   // Fetch tasks from API
   const fetchTasks = async () => {
@@ -122,10 +125,11 @@ function App() {
     }
   };
 
-  const getPriorityColor = (status) => {
-    switch(status) {
-      case 'In-Progress': return 'bg-orange-100 text-orange-800 border-orange-200';
-      case 'Completed': return 'bg-green-100 text-green-800 border-green-200';
+  const getPriorityColor = (priority) => {
+    switch(priority) {
+      case 'High': return 'bg-red-100 text-red-800 border-red-200';
+      case 'Medium': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'Low': return 'bg-green-100 text-green-800 border-green-200';
       default: return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
@@ -142,7 +146,16 @@ function App() {
     const matchesSearch = task.task_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          task.description.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = filterStatus === 'All' || task.status === filterStatus;
-    return matchesSearch && matchesStatus;
+    const matchesPriority = filterPriority === 'All' || task.priority === filterPriority;
+    return matchesSearch && matchesStatus && matchesPriority;
+  });
+
+  const sortedTasks = [...filteredTasks].sort((a, b) => {
+    if (sortBy === 'Priority') {
+      const priorityOrder = { 'High': 0, 'Medium': 1, 'Low': 2 };
+      return priorityOrder[a.priority] - priorityOrder[b.priority];
+    }
+    return 0;
   });
 
   const taskStats = {
@@ -276,6 +289,24 @@ function App() {
                   <option value="In-Progress">In Progress</option>
                   <option value="Completed">Completed</option>
                 </select>
+                <select
+                  value={filterPriority}
+                  onChange={(e) => setFilterPriority(e.target.value)}
+                  className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+                >
+                  <option value="All">All Priority</option>
+                  <option value="High">High</option>
+                  <option value="Medium">Medium</option>
+                  <option value="Low">Low</option>
+                </select>
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+                >
+                  <option value="None">Sort by</option>
+                  <option value="Priority">Priority</option>
+                </select>
               </div>
             </div>
           </div>
@@ -302,7 +333,7 @@ function App() {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
-                {filteredTasks.map(task => (
+                {sortedTasks.map(task => (
                   <div key={task.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow">
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex items-center flex-1">
@@ -347,9 +378,14 @@ function App() {
                     </p>
 
                     <div className="flex items-center justify-between mb-3">
-                      <span className={`px-2 py-1 rounded-full text-xs border ${getPriorityColor(task.status)}`}>
-                        {task.status}
-                      </span>
+                      <div className="flex space-x-2">
+                        <span className={`px-2 py-1 rounded-full text-xs border ${getStatusColor(task.status) === 'text-green-600' ? 'bg-green-100 text-green-800 border-green-200' : 'bg-orange-100 text-orange-800 border-orange-200'}`}>
+                          {task.status}
+                        </span>
+                        <span className={`px-2 py-1 rounded-full text-xs border ${getPriorityColor(task.priority)}`}>
+                          {task.priority}
+                        </span>
+                      </div>
                       
                       {task.updated_at && (
                         <div className="flex items-center text-xs text-gray-500">
