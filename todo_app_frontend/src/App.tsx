@@ -50,12 +50,15 @@ function App() {
       const response = await fetch(`${API_BASE_URL}/tasks/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newTask)
+        body: JSON.stringify({
+          ...newTask,
+          priority: newTask.priority || 'Medium'
+        })
       });
       if (!response.ok) throw new Error('Failed to create task');
       
       await fetchTasks(); // Refresh tasks list
-      setNewTask({ task_name: '', description: '' });
+      setNewTask({ task_name: '', description: '', priority: 'Medium' });
       setShowAddForm(false);
     } catch (err) {
       setError(err.message);
@@ -75,7 +78,8 @@ function App() {
         body: JSON.stringify({
           task_name: editingTask.task_name,
           description: editingTask.description,
-          status: editingTask.status
+          status: editingTask.status,
+          priority: editingTask.priority || 'Medium'
         })
       });
       if (!response.ok) throw new Error('Failed to update task');
